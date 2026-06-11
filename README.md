@@ -40,11 +40,11 @@ spirex -u https://example.com | sort -u > urls.txt
 
 ## Install
 
-**One line** — clone, build, and install `spirex` system-wide into
-`/usr/local/bin`, available for every user (needs a **JDK 21+** and `git`):
+**One line** — download the latest release and install `spirex` system-wide into
+`/usr/local/bin` (needs a **JDK 21+** to run; no `git`, no build):
 
 ```bash
-git clone https://github.com/0x9r4ngu/spirex.git && cd spirex && sudo PREFIX=/usr/local ./install.sh
+curl -fsSL https://raw.githubusercontent.com/0x9r4ngu/spirex/main/get.sh | sudo bash
 ```
 
 `/usr/local/bin` is already on everyone's `PATH`, so you can run it from anywhere:
@@ -54,15 +54,27 @@ spirex --help
 spirex -u https://example.com
 ```
 
+Prefer a user-local install (no `sudo`)? Point `PREFIX` at your home directory:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/0x9r4ngu/spirex/main/get.sh | PREFIX="$HOME/.local" bash
+```
+
 **Uninstall** anytime:
 
 ```bash
-sudo PREFIX=/usr/local ./uninstall.sh
+sudo rm -f /usr/local/bin/spirex && sudo rm -rf /usr/local/share/spirex
+```
+
+### Build from source
+
+Prefer to clone and build it yourself?
+
+```bash
+git clone https://github.com/0x9r4ngu/spirex.git && cd spirex && sudo PREFIX=/usr/local ./install.sh
 ```
 
 ### Run without installing
-
-Prefer not to install anything? Build the jar and run it directly:
 
 ```bash
 ./build.sh
