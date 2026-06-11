@@ -1,0 +1,16 @@
+# build artifacts
+out/
+out-test/
+*.class
+spirex.jar
+spirex.jar.bak
+spirex.jar.new
+
+# crawl output
+spirex_response/
+*.req
+
+# editor / OS
+.idea/
+*.iml
+.DS_Store
