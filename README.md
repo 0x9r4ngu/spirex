@@ -40,45 +40,33 @@ spirex -u https://example.com | sort -u > urls.txt
 
 ## Install
 
-**One line** — clone, build, install the `spirex` launcher, and add it to your
-`PATH` (needs a **JDK 21+** and `git`):
+**One line** — clone, build, and install `spirex` system-wide into
+`/usr/local/bin`, available for every user (needs a **JDK 21+** and `git`):
 
 ```bash
-git clone https://github.com/0x9r4ngu/spirex.git && cd spirex && ./install.sh
+git clone https://github.com/0x9r4ngu/spirex.git && cd spirex && sudo PREFIX=/usr/local ./install.sh
 ```
 
-That's it. The installer builds the tool, drops a `spirex` command into
-`~/.local/bin`, and adds that directory to your `PATH` for you — no `sudo`,
-everything stays under your home directory. Then run it from anywhere:
+`/usr/local/bin` is already on everyone's `PATH`, so you can run it from anywhere:
 
 ```bash
 spirex --help
 spirex -u https://example.com
 ```
 
-> If your shell can't find `spirex` right after install, the installer printed a
-> `source ~/.zshrc` (or `~/.bashrc`) line to run once — or just open a new
-> terminal.
-
 **Uninstall** anytime:
 
 ```bash
-./uninstall.sh
+sudo PREFIX=/usr/local ./uninstall.sh
 ```
 
 ### Run without installing
 
-Prefer not to install? Build the jar and run it directly:
+Prefer not to install anything? Build the jar and run it directly:
 
 ```bash
 ./build.sh
 java -jar spirex.jar -u https://example.com
-```
-
-### System-wide install (optional)
-
-```bash
-sudo PREFIX=/usr/local ./install.sh     # puts spirex in /usr/local/bin
 ```
 
 ---
