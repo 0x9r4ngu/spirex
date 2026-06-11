@@ -27,14 +27,63 @@ echo
 echo "  installing $APP ..."
 echo
 
-# 1. Java present?
-if ! command -v java >/dev/null 2>&1; then
-    err "Java not found. Install a JDK 21+ first:"
-    err "  Debian/Kali/Ubuntu:  sudo apt install default-jdk"
-    err "  macOS (brew):        brew install openjdk"
-    exit 1
+# 1. Java present? Detect it (incl. the invoking user's env under sudo), and
+#    auto-install a JDK if it genuinely isn't there.
+install_jdk() {
+    local SUDO=""
+    if [ "$(id -u)" -ne 0 ]; then
+        command -v sudo >/dev/null 2>&1 && SUDO="sudo" || return 1
+    fi
+    export DEBIAN_FRONTEND=noninteractive
+    if   command -v apt-get >/dev/null 2>&1; then
+        $SUDO apt-get update -qq || true
+        $SUDO apt-get install -y openjdk-21-jre-headless \
+            || $SUDO apt-get install -y default-jre \
+            || $SUDO apt-get install -y default-jdk
+    elif command -v dnf >/dev/null 2>&1; then
+        $SUDO dnf install -y java-21-openjdk-headless \
+            || $SUDO dnf install -y java-latest-openjdk-headless
+    elif command -v yum >/dev/null 2>&1; then
+        $SUDO yum install -y java-21-openjdk
+    elif command -v pacman >/dev/null 2>&1; then
+        $SUDO pacman -Sy --noconfirm jre-openjdk
+    elif command -v zypper >/dev/null 2>&1; then
+        $SUDO zypper --non-interactive install java-21-openjdk
+    elif command -v apk >/dev/null 2>&1; then
+        $SUDO apk add --no-cache openjdk21-jre
+    elif command -v brew >/dev/null 2>&1; then
+        [ "$(id -u)" -eq 0 ] && return 1   # Homebrew refuses to run as root
+        brew install openjdk
+    else
+        return 1
+    fi
+}
+
+# When run via `sudo`, root's PATH may not include a user-installed JDK
+# (SDKMAN, etc.). Check the original user's login shell before giving up.
+USER_JAVA=""
+if [ -n "${SUDO_USER:-}" ] && [ "${SUDO_USER}" != "root" ]; then
+    USER_JAVA="$(sudo -u "$SUDO_USER" sh -lc 'command -v java' 2>/dev/null || true)"
 fi
-ok "found Java — $(java -version 2>&1 | head -1)"
+
+if command -v java >/dev/null 2>&1; then
+    ok "found Java — $(java -version 2>&1 | head -1)"
+elif [ -n "$USER_JAVA" ]; then
+    ok "found Java in ${SUDO_USER}'s environment — $("$USER_JAVA" -version 2>&1 | head -1)"
+    say "the launcher runs 'java' from your PATH, so you're set"
+else
+    say "Java not found — installing a JDK (this may take a minute) ..."
+    if install_jdk && { hash -r 2>/dev/null; command -v java >/dev/null 2>&1; }; then
+        ok "installed Java — $(java -version 2>&1 | head -1)"
+    else
+        err "couldn't install Java automatically. Install a JDK 21+ and re-run:"
+        err "  Debian/Kali/Ubuntu:  sudo apt install default-jdk"
+        err "  Fedora/RHEL:         sudo dnf install java-21-openjdk"
+        err "  Arch:                sudo pacman -S jre-openjdk"
+        err "  macOS (brew):        brew install openjdk"
+        exit 1
+    fi
+fi
 
 # 2. A downloader (curl or wget).
 if command -v curl >/dev/null 2>&1; then
