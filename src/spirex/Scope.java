@@ -31,7 +31,19 @@ public class Scope {
             "edgesuite.net", "azureedge.net", "stackpathcdn.com", "cdn77.org",
             "googleusercontent.com", "gstatic.com", "jsdelivr.net", "unpkg.com");
 
+    /**
+     * Session-destroying endpoints. Following one of these while carrying an auth
+     * cookie logs the crawler out, which both invalidates the session and starves
+     * the crawl (every later page becomes the unauthenticated login screen). The
+     * token must be delimited so we match {@code /logout/} or {@code ?do=sign-out}
+     * but not an arbitrary substring. Opt back in with {@code --allow-logout}.
+     */
+    private static final Pattern LOGOUT = Pattern.compile(
+            "(?i)(?:^|[/_.?&=-])(?:log[_-]?out|log[_-]?off|sign[_-]?out|sign[_-]?off"
+                    + "|signoff|deauth(?:enticate)?|disconnect)(?:[/_.?&=-]|$)");
+
     private final Mode mode;
+    private final boolean excludeLogout;
     private final String seedHost;
     private final String seedRoot;
     private final List<Pattern> include = new ArrayList<>();
@@ -42,6 +54,7 @@ public class Scope {
     public Scope(Options opts, String seedHost) {
         this.seedHost = seedHost == null ? "" : seedHost.toLowerCase();
         this.seedRoot = rootDomain(this.seedHost);
+        this.excludeLogout = !opts.crawlLogout;
 
         // crawl-scope / crawl-out-scope regex lists
         for (String r : opts.crawlScope) {
@@ -126,6 +139,23 @@ public class Scope {
             case STRICT -> host.equals(seedHost);
             case SUBS -> host.equals(seedRoot) || host.endsWith("." + seedRoot);
         };
+    }
+
+    /**
+     * True if visiting this URL would destroy the crawl session (logout / sign-out
+     * and friends). Skipped by default so an authenticated crawl keeps its cookie;
+     * disable with {@code --allow-logout}.
+     */
+    public boolean isSessionDestroying(URI uri) {
+        if (!excludeLogout) {
+            return false;
+        }
+        String path = uri.getRawPath();
+        if (path == null || path.isEmpty()) {
+            return false;
+        }
+        String probe = uri.getRawQuery() == null ? path : path + "?" + uri.getRawQuery();
+        return LOGOUT.matcher(probe).find();
     }
 
     /** True if the host matches any -e exclude filter (cdn/private-ips/cidr/ip/regex). */

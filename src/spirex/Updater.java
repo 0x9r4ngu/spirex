@@ -15,7 +15,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Version checking and self-update, modelled on nuclei's behaviour:
+ * Version checking and self-update:
  *
  *   - On every normal run spirex compares its baked-in {@link OutputWriter#VERSION}
  *     against the latest GitHub release and prints an "update available" notice to

@@ -97,7 +97,7 @@ spirex --help                                 # full option list
 
 ## Updating
 
-`spirex` checks for new releases the same way `nuclei` does. On every run it
+`spirex` checks for new releases automatically. On every run it
 compares its own version against the latest GitHub release and, if you're behind,
 prints a one-time notice to **stderr**:
 

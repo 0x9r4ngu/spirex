@@ -125,6 +125,17 @@ public class Tests {
         check("exclude cdn", exCdn.isExcluded(URI.create("https://foo.cloudfront.net/")));
         Scope exRe = new Scope(opts(o -> o.exclude.add("tracker")), "x");
         check("exclude regex", exRe.isExcluded(URI.create("https://tracker.example.com/")));
+
+        // session-destroying (logout) endpoints: skipped by default, kept with --allow-logout
+        Scope sd = new Scope(opts(o -> o.fieldScope = "rdn"), "example.com");
+        check("skip /logout/", sd.isSessionDestroying(URI.create("https://example.com/logout/")));
+        check("skip /accounts/logout", sd.isSessionDestroying(URI.create("https://example.com/accounts/logout")));
+        check("skip ?do=sign-out", sd.isSessionDestroying(URI.create("https://example.com/auth?do=sign-out")));
+        check("skip /logoff", sd.isSessionDestroying(URI.create("https://example.com/user/logoff")));
+        check("keep content url", !sd.isSessionDestroying(URI.create("https://example.com/cost/rate-cards/359/")));
+        check("keep logout-in-slug", !sd.isSessionDestroying(URI.create("https://example.com/logouts-report/")));
+        Scope sdAllow = new Scope(opts(o -> o.crawlLogout = true), "example.com");
+        check("allow-logout opts back in", !sdAllow.isSessionDestroying(URI.create("https://example.com/logout/")));
     }
 
     private static void testLinkExtractor() {

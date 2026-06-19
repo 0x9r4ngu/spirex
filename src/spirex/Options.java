@@ -74,6 +74,7 @@ public class Options {
     public String fieldScope = "rdn";                           // -fs, -field-scope (dn|rdn|fqdn|regex)
     public boolean noScope = false;                             // -ns, -no-scope
     public boolean displayOutScope = false;                     // -do, -display-out-scope
+    public boolean crawlLogout = false;                         // --allow-logout (default: skip logout/sign-out)
 
     // ---- FILTER ----
     public final List<String> matchRegex = new ArrayList<>();   // -mr, -match-regex

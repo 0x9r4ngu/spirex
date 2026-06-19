@@ -84,6 +84,7 @@ public class Main {
                 case "--in-scope" -> opts.crawlScope.add(val(args, ++i, a));
                 case "--out-scope" -> opts.crawlOutScope.add(val(args, ++i, a));
                 case "--skip" -> addList(opts.exclude, val(args, ++i, a));
+                case "--allow-logout" -> opts.crawlLogout = true;
                 case "--show-external" -> opts.displayOutScope = true;
 
                 // ---- network ----
@@ -255,6 +256,7 @@ public class Main {
                       --in-scope <re>     only crawl URLs matching this regex
                       --out-scope <re>    never crawl URLs matching this regex
                       --skip <filter>     skip hosts: cdn | private | <ip> | <cidr> | <regex>
+                      --allow-logout      follow logout/sign-out links (default: skip, keeps session)
                       --show-external     also list external links (without crawling them)
 
                 NETWORK

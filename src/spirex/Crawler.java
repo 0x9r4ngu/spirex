@@ -204,6 +204,12 @@ public class Crawler {
         } catch (Exception e) {
             return;
         }
+        if (scope.isSessionDestroying(uri)) {
+            if (opts.verbose) {
+                output.info("[*] skipping session-destroying endpoint: " + norm);
+            }
+            return;
+        }
         if (scope.isExcluded(uri)) {
             return;
         }
