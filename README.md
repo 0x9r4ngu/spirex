@@ -40,30 +40,32 @@ spirex -u https://example.com | sort -u > urls.txt
 
 ## Install
 
-**One line** — download the latest release and install `spirex` system-wide into
-`/usr/local/bin` (needs a **JDK 21+** to run; no `git`, no build):
+**One line** — download the latest release and install `spirex` into `~/.local`
+(no `sudo`, needs a **JDK 21+** to run; no `git`, no build). `spirex --update`
+stays sudo-free too:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/0x9r4ngu/spirex/main/get.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/0x9r4ngu/spirex/main/get.sh | bash
 ```
 
-`/usr/local/bin` is already on everyone's `PATH`, so you can run it from anywhere:
+The installer adds `~/.local/bin` to your `PATH`, so after reloading your shell
+you can run it from anywhere:
 
 ```bash
 spirex --help
 spirex -u https://example.com
 ```
 
-Prefer a user-local install (no `sudo`)? Point `PREFIX` at your home directory:
+Want it **system-wide** in `/usr/local/bin` instead? Set `PREFIX` and use `sudo`:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/0x9r4ngu/spirex/main/get.sh | PREFIX="$HOME/.local" bash
+curl -fsSL https://raw.githubusercontent.com/0x9r4ngu/spirex/main/get.sh | PREFIX=/usr/local sudo bash
 ```
 
 **Uninstall** anytime:
 
 ```bash
-sudo rm -f /usr/local/bin/spirex && sudo rm -rf /usr/local/share/spirex
+rm -f ~/.local/bin/spirex && rm -rf ~/.local/share/spirex
 ```
 
 ### Build from source
@@ -71,7 +73,7 @@ sudo rm -f /usr/local/bin/spirex && sudo rm -rf /usr/local/share/spirex
 Prefer to clone and build it yourself?
 
 ```bash
-git clone https://github.com/0x9r4ngu/spirex.git && cd spirex && sudo PREFIX=/usr/local ./install.sh
+git clone https://github.com/0x9r4ngu/spirex.git && cd spirex && ./install.sh
 ```
 
 ### Run without installing
