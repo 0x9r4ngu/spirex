@@ -31,7 +31,7 @@ public class OutputWriter {
     /** Brand red (#cc0000) from 0x9r4ngu.github.io, as a 24-bit truecolor escape. */
     private static final String BRAND = "\u001b[38;2;204;0;0m";
 
-    public static final String VERSION = "1.0.4";
+    public static final String VERSION = "1.0.5";
 
     /**
      * Default static-asset extensions. Default output filtering is left OFF so
