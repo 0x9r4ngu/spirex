@@ -34,7 +34,12 @@ public final class Updater {
     private static final String REPO = "0x9r4ngu/spirex";
     private static final String LATEST_API =
             "https://api.github.com/repos/" + REPO + "/releases/latest";
+    // Passive "update available" check: kept short so a normal crawl never stalls
+    // on a slow/unreachable API (it fails soft to "no notice").
     private static final Duration NET_TIMEOUT = Duration.ofSeconds(4);
+    // Explicit `--update`: generous enough that on a broken-IPv6 network the JDK can
+    // exhaust the dead AAAA address and fall back to IPv4 before the deadline.
+    private static final Duration UPDATE_TIMEOUT = Duration.ofSeconds(15);
     private static final long CACHE_TTL_SECONDS = 6 * 3600;
 
     private static final String RESET = "[0m";
@@ -73,7 +78,7 @@ public final class Updater {
         if (cached != null && (now - cached.checkedAt) < CACHE_TTL_SECONDS) {
             return cached.latest;
         }
-        Http resp = httpGet(LATEST_API);
+        Http resp = httpGet(LATEST_API, NET_TIMEOUT);
         String fetched = resp.status() / 100 == 2 ? fetchLatestTag(resp.body()) : null;
         if (fetched != null) {
             writeCache(now, fetched);
@@ -90,7 +95,7 @@ public final class Updater {
         boolean color = useColor(opts);
         System.out.println(c(color, CYAN, "[*]") + " spirex: checking for updates ...");
 
-        Http resp = httpGet(LATEST_API);
+        Http resp = httpGet(LATEST_API, UPDATE_TIMEOUT);
         if (resp.status() == 0) {
             fail(color, "could not reach the update server (api.github.com) — check connectivity");
             return;
@@ -159,14 +164,14 @@ public final class Updater {
     private record Http(int status, String body) {
     }
 
-    private static Http httpGet(String url) {
+    private static Http httpGet(String url, Duration timeout) {
         try {
             HttpClient client = HttpClient.newBuilder()
-                    .connectTimeout(NET_TIMEOUT)
+                    .connectTimeout(timeout)
                     .followRedirects(HttpClient.Redirect.NORMAL)
                     .build();
             HttpRequest req = HttpRequest.newBuilder(URI.create(url))
-                    .timeout(NET_TIMEOUT)
+                    .timeout(timeout)
                     .header("User-Agent", "spirex/" + OutputWriter.VERSION)
                     .header("Accept", "application/vnd.github+json")
                     .GET()
