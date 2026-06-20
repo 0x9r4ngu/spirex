@@ -41,6 +41,7 @@ public class Tests {
         testTechDetect();
         testOutputFields();
         testRateLimiter();
+        testAiAdvisor();
         testIntegrationCrawl();
         testDepthLimit();
         testStrategiesSameSet();
@@ -366,6 +367,47 @@ public class Tests {
         } finally {
             s.stop(0);
         }
+    }
+
+    private static void testAiAdvisor() {
+        section("AiAdvisor endpoint selection + response parsing");
+        List<String> urls = List.of(
+                "https://e.com/",
+                "https://e.com/about",
+                "https://e.com/user/1",
+                "https://e.com/user/2",                 // folds with /user/1
+                "https://e.com/product.php?id=5",
+                "https://e.com/product.php?id=9",        // folds with id=5
+                "https://e.com/search?q=hi",
+                "https://e.com/img/logo.png");
+
+        List<String> sel = AiAdvisor.selectEndpoints(urls, 60);
+        check("folds look-alike id paths", sel.stream()
+                .filter(u -> u.contains("/user/")).count() == 1);
+        check("folds same param signature", sel.stream()
+                .filter(u -> u.contains("product.php")).count() == 1);
+        check("parameterised endpoint kept", sel.stream().anyMatch(u -> u.contains("?")));
+        check("interesting param URL ranked before static page",
+                indexOf(sel, "search?q=") < indexOf(sel, "/about"));
+
+        List<String> capped = AiAdvisor.selectEndpoints(urls, 2);
+        check("respects max cap", capped.size() == 2);
+
+        // Response parsing: pull only "text" parts, decode escapes, skip siblings.
+        String json = "{\"candidates\":[{\"content\":{\"parts\":[{\"text\":\"line1\\n"
+                + "line2 \\u0026 more\",\"thoughtSignature\":\"IGNORE\"}]}}]}";
+        eq("extractText decodes parts", AiAdvisor.extractText(json), "line1\nline2 & more");
+        String err = "{\"error\":{\"code\":400,\"message\":\"API key not valid\"}}";
+        eq("extractError reads message", AiAdvisor.extractError(err), "API key not valid");
+    }
+
+    private static int indexOf(List<String> list, String needle) {
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).contains(needle)) {
+                return i;
+            }
+        }
+        return Integer.MAX_VALUE;
     }
 
     // ---------- helpers ----------

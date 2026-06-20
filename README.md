@@ -236,6 +236,31 @@ or `@file` (`-u`, `--skip`, `--ext-only`, …).
 | `--json` | JSON Lines output |
 | `--store` / `--store-dir <dir>` | Save raw responses to disk |
 | `-v` / `-q` / `--no-color` | Verbose / quiet / no colour |
+
+### AI
+| Flag | Description |
+|------|-------------|
+| `--ai <gemini-key>` | After crawling, ask Google Gemini which vulnerabilities to test on the discovered endpoints (plain-text suggestions, printed to stderr) |
+| `--ai-model <name>` | Gemini model to use (default `gemini-flash-lite-latest`) — see list below |
+
+Supported `--ai-model` values (text models that support `generateContent`):
+`gemini-flash-lite-latest`, `gemini-flash-latest`, `gemini-pro-latest`,
+`gemini-3.5-flash`, `gemini-3.1-pro-preview`, `gemini-3.1-flash-lite`,
+`gemini-3-pro-preview`, `gemini-3-flash-preview`, `gemini-2.5-pro`,
+`gemini-2.5-flash`, `gemini-2.5-flash-lite`, `gemini-2.0-flash`,
+`gemini-2.0-flash-lite`. Any other `generateContent`-capable model name also works.
+
+The AI pass folds look-alike URLs, picks the most representative endpoints
+(parameterised and high-value paths first), and asks the model what to test on
+each. Get a free key from [Google AI Studio](https://aistudio.google.com/apikey).
+
+```bash
+spirex http://testaspnet.vulnweb.com/ --ai "$GEMINI_API_KEY"
+```
+
+### Update
+| Flag | Description |
+|------|-------------|
 | `--update` | Update spirex to the latest release |
 | `--disable-update-check` | Skip the startup version check |
 | `--health` | Self-diagnostic (Java/OS/DNS) |

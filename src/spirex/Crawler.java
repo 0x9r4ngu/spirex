@@ -30,6 +30,8 @@ public class Crawler {
     private final Set<String> visited = ConcurrentHashMap.newKeySet();
     private final Set<Integer> seenBodies = ConcurrentHashMap.newKeySet();
     private final Set<String> hosts = ConcurrentHashMap.newKeySet();
+    // Distinct in-scope URLs retained for the optional post-crawl --ai analysis.
+    private final Set<String> aiUrls = ConcurrentHashMap.newKeySet();
     final AtomicInteger crawledCount = new AtomicInteger(0);
     private final AtomicInteger errorCount = new AtomicInteger(0);
     // Status-code class tallies: index 1..5 = 1xx..5xx.
@@ -106,11 +108,17 @@ public class Crawler {
             }
         }
 
-        output.close();
         closeErrorLog();
         output.summary(System.currentTimeMillis() - t0, crawledCount.get(), visited.size(),
                 hosts.size(), statusClass.get(2), statusClass.get(3), statusClass.get(4),
                 statusClass.get(5), errorCount.get());
+
+        // AI analysis runs before the output file is closed so it can be appended to -o.
+        if (opts.aiKey != null) {
+            AiAdvisor.run(aiUrls, opts,
+                    opts.seeds.isEmpty() ? "the target" : opts.seeds.get(0), output);
+        }
+        output.close();
     }
 
     private void workerLoop() {
@@ -157,6 +165,9 @@ public class Crawler {
         if (!duplicate) {
             output.write(new Result(node.url(), node.source(), node.depth(),
                     resp.status(), resp.contentType(), tech, false));
+            if (opts.aiKey != null) {
+                aiUrls.add(node.url());
+            }
         }
 
         // Path-climb: surface parent directories as crawlable endpoints.

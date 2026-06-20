@@ -120,6 +120,10 @@ public class Main {
                 case "-q", "--quiet" -> opts.silent = true;
                 case "--no-color" -> opts.noColor = true;
 
+                // ---- ai ----
+                case "--ai" -> opts.aiKey = val(args, ++i, a);
+                case "--ai-model" -> opts.aiModel = val(args, ++i, a);
+
                 // ---- update ----
                 case "-up", "--update" -> opts.update = true;
                 case "-duc", "--disable-update-check" -> opts.disableUpdateCheck = true;
@@ -289,6 +293,17 @@ public class Main {
                   -q, --quiet             results only - no banner or summary
                       --no-color          disable colour
 
+                AI
+                      --ai <gemini-key>   after crawling, ask Google Gemini which
+                                          vulnerabilities to test on the discovered endpoints
+                      --ai-model <name>   Gemini model (default gemini-flash-lite-latest); one of:
+                                          gemini-flash-lite-latest, gemini-flash-latest,
+                                          gemini-pro-latest, gemini-3.5-flash,
+                                          gemini-3.1-pro-preview, gemini-3.1-flash-lite,
+                                          gemini-3-pro-preview, gemini-3-flash-preview,
+                                          gemini-2.5-pro, gemini-2.5-flash, gemini-2.5-flash-lite,
+                                          gemini-2.0-flash, gemini-2.0-flash-lite
+
                 UPDATE
                       --update            update spirex to the latest release
                       --disable-update-check  do not check for a new version on startup
@@ -303,6 +318,7 @@ public class Main {
                   spirex example.com --scripts --known-files all -m "/api/" -o out.txt
                   spirex -l hosts.txt -b --json -q --ext-skip png,css,svg
                   spirex example.com --scope host --skip private,cdn --tech
+                  spirex http://testaspnet.vulnweb.com/ --ai <gemini-api-key>
                 """);
     }
 }

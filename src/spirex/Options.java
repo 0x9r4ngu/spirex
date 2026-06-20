@@ -96,6 +96,10 @@ public class Options {
     public int rateLimit = 150;                                 // -rl, -rate-limit
     public int rateLimitMinute = 0;                             // -rlm, -rate-limit-minute
 
+    // ---- AI ----
+    public String aiKey = null;                                 // --ai <gemini api key>
+    public String aiModel = "gemini-flash-lite-latest";         // --ai-model
+
     // ---- UPDATE ----
     public boolean update = false;                              // -up, -update
     public boolean disableUpdateCheck = false;                  // -duc, -disable-update-check
