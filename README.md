@@ -2,6 +2,10 @@
 
 **A fast, multithreaded web crawler in pure Java — zero dependencies.**
 
+<p align="center">
+  <img src="docs/demo.gif" alt="spirex crawling in action" width="900">
+</p>
+
 `spirex` seeds from one or more URLs and crawls links concurrently across a pool
 of worker threads, staying within a defined scope and depth, then prints every
 URL it finds. It's built on nothing but the JDK standard library — no Maven, no
